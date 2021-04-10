@@ -35,7 +35,7 @@ def getOneTranscipt(url):
 
     return script
 
-def createTransciptFiles():
+def create_transcript_files():
     '''
     Add unique identifying tokens and transcript to a text file
 

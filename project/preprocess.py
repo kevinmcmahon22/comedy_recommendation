@@ -43,7 +43,7 @@ def lemmatize(text):
     return ' '.join(mytokens)
 
 
-def to_vectors():
+def create_vectors():
     '''
     Reading scripts and converting into document-term dataframes
 
