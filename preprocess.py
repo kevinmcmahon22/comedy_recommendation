@@ -43,7 +43,7 @@ def lemmatize(text):
     return ' '.join(mytokens)
 
 
-def create_vectors():
+def create_transcript_vectors():
     '''
     Reading scripts and converting into document-term dataframes
 
@@ -82,6 +82,7 @@ def create_vectors():
         script_path = "scripts/script" + str(script_num)
         f = open(script_path, "r")
         title = f.readline()
+        title = ' '.join(title.split('-'))
 
         # don't process scripts that contain any of the following keywords in their title
         skip_tokens = ['snl', 'saturday', 'italiano', 'speech', 'monologue', 'show']
@@ -93,28 +94,29 @@ def create_vectors():
         if not valid_special:
             continue
 
-        content = f.read()
+        # content = f.read()
 
-        # preprocessing tasks
-        content = remove_ints(content)
-        content = remove_one_two_char_words(content)
-        content = lemmatize(content)
+        # # preprocessing tasks
+        # content = content.lower()
+        # content = remove_ints(content)
+        # content = remove_one_two_char_words(content)
+        # content = lemmatize(content)
 
-        # Count vectorizer
-        # vector = CountVectorizer()
-        # arr = vector.fit_transform([content])
-        # df = pd.DataFrame(arr.toarray(), columns=vector.get_feature_names())
-        # print(df.to_string)
+        # # Count vectorizer
+        # # vector = CountVectorizer()
+        # # arr = vector.fit_transform([content])
+        # # df = pd.DataFrame(arr.toarray(), columns=vector.get_feature_names())
+        # # print(df.to_string)
 
-        # TF-IDF transformation
-        TFIDF = TfidfVectorizer()
-        vec = TFIDF.fit_transform([content])
-        df = pd.DataFrame(vec.toarray(), columns=TFIDF.get_feature_names())
-        # print(df.to_string)
+        # # TF-IDF transformation
+        # TFIDF = TfidfVectorizer()
+        # vec = TFIDF.fit_transform([content])
+        # df = pd.DataFrame(vec.toarray(), columns=TFIDF.get_feature_names())
+        # # print(df.to_string)
 
         # Write title and df to files
         titles_file.write(title)
-        df.to_csv(f'vectors/vec{vec_num}.csv')
+        # df.to_csv(f'vectors/vec{vec_num}.csv')
         vec_num += 1
 
     # flush buffer, actually write to file
@@ -124,3 +126,20 @@ def create_vectors():
     # Wall time: 3768.74403s
     print(f'Process time: {round(time.clock() - cpu_start, 5)}s')
     print(f'Wall time: {round(time.time() - wall_start, 5)}s')
+
+
+def create_keywords_vector(keywords):
+    '''
+    Read text and convert to a vector, just like above function
+
+    returns: a dataframe of TF-IDF vector for the string keywords
+    '''
+    # keywords = keywords.lower()
+    # keywords = remove_ints(keywords)
+    # keywords = remove_one_two_char_words(keywords)
+    # keywords = lemmatize(keywords)
+
+    TFIDF = TfidfVectorizer()
+    vec = TFIDF.fit_transform([keywords])
+    df = pd.DataFrame(vec.toarray(), columns=TFIDF.get_feature_names())
+    return df
