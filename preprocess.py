@@ -16,7 +16,7 @@ def remove_ints(text):
     # return text.translate(None, digits)
     remove_digits = str.maketrans('', '', digits)
     return text.translate(remove_digits)
- 
+
 
 def remove_one_two_char_words(text):
     '''
@@ -94,29 +94,28 @@ def create_transcript_vectors():
         if not valid_special:
             continue
 
-        # content = f.read()
+        content = f.read()
 
-        # # preprocessing tasks
-        # content = content.lower()
-        # content = remove_ints(content)
-        # content = remove_one_two_char_words(content)
-        # content = lemmatize(content)
+        # preprocessing tasks
+        content = content.lower()
+        content = remove_ints(content)
+        content = remove_one_two_char_words(content)
+        content = lemmatize(content)
 
-        # # Count vectorizer
-        # # vector = CountVectorizer()
-        # # arr = vector.fit_transform([content])
-        # # df = pd.DataFrame(arr.toarray(), columns=vector.get_feature_names())
-        # # print(df.to_string)
+        # Count vectorizer
+        # vector = CountVectorizer()
+        # arr = vector.fit_transform([content])
+        # df = pd.DataFrame(arr.toarray(), columns=vector.get_feature_names())
 
-        # # TF-IDF transformation
-        # TFIDF = TfidfVectorizer()
-        # vec = TFIDF.fit_transform([content])
-        # df = pd.DataFrame(vec.toarray(), columns=TFIDF.get_feature_names())
-        # # print(df.to_string)
+        # TF-IDF transformation
+        TFIDF = TfidfVectorizer()
+        vec = TFIDF.fit_transform([content])
+        df = pd.DataFrame(vec.toarray(), columns=TFIDF.get_feature_names())
+        print(df.to_string)
 
         # Write title and df to files
         titles_file.write(title)
-        # df.to_csv(f'vectors/vec{vec_num}.csv')
+        df.to_csv(f'vectors/vec{vec_num}.csv')
         vec_num += 1
 
     # flush buffer, actually write to file
@@ -132,14 +131,17 @@ def create_keywords_vector(keywords):
     '''
     Read text and convert to a vector, just like above function
 
-    returns: a dataframe of TF-IDF vector for the string keywords
+    returns: a dataframe containing TF-IDF vector for (string) keywords
     '''
-    # keywords = keywords.lower()
-    # keywords = remove_ints(keywords)
-    # keywords = remove_one_two_char_words(keywords)
-    # keywords = lemmatize(keywords)
 
-    TFIDF = TfidfVectorizer()
-    vec = TFIDF.fit_transform([keywords])
-    df = pd.DataFrame(vec.toarray(), columns=TFIDF.get_feature_names())
-    return df
+    # preprocess tasks
+    keywords = keywords.lower()
+    keywords = remove_ints(keywords)        # NOTE: remove year numbers in title
+    keywords = remove_one_two_char_words(keywords)
+    # keywords = lemmatize(keywords)        # NOTE: comment out since by far most expensive preprocess task
+
+    # barring duplicate words in search query, both methods lead to identical results
+    # VecTrans = TfidfVectorizer()
+    VecTrans = CountVectorizer()
+    vec = VecTrans.fit_transform([keywords])
+    return pd.DataFrame(vec.toarray(), columns=VecTrans.get_feature_names())
