@@ -4,6 +4,13 @@ from string import digits
 import spacy
 import pandas as pd
 import time
+from tqdm import tqdm
+
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords 
+# nltk.download('punkt')
+nltk.download('stopwords')
 
 
 def remove_ints(text):
@@ -18,12 +25,20 @@ def remove_ints(text):
     return text.translate(remove_digits)
 
 
-def remove_one_two_char_words(text):
-    '''
-    https://stackoverflow.com/questions/12628958/remove-small-words-using-python
-    '''
+def remove_stopwords(text):
+    text = text.lower()
+    # https://stackoverflow.com/questions/12628958/remove-small-words-using-python
     shortword = re.compile(r'\W*\b\w{1,2}\b')
-    return shortword.sub('', text)
+
+    stopWords = set(stopwords.words('english'))
+    content = word_tokenize(text)
+    newText = ''
+
+    for word in content:
+        if word not in stopWords:
+            newText = newText + word + ' '
+    
+    return shortword.sub('', newText)
 
 
 def lemmatize(text):
@@ -56,7 +71,6 @@ def create_transcript_vectors():
     # path = "/content/drive/My Drive/CSE881 Group Project/scripts/script"
 
     # Measure wall and cpu execution time
-    cpu_start = time.clock()
     wall_start = time.time()
     
     # scripts to skip, scraping errors
@@ -68,12 +82,12 @@ def create_transcript_vectors():
     vec_num = 0
 
     # 372 total specials scraped
-    for script_num in range(0, 372):
+    for script_num in tqdm( range(372) , desc="Loading…" , ascii=False , ncols=75 ):
         
         # skip files that returned no data when scraping
         if script_num in skips:
             continue
-        
+
         # Google Drive/Collab
         # final_path = path + str(i)
         # f = open(final_path, "r")
@@ -99,7 +113,7 @@ def create_transcript_vectors():
         # preprocessing tasks
         content = content.lower()
         content = remove_ints(content)
-        content = remove_one_two_char_words(content)
+        content = remove_stopwords(content)
         content = lemmatize(content)
 
         # Count vectorizer
@@ -111,7 +125,6 @@ def create_transcript_vectors():
         TFIDF = TfidfVectorizer()
         vec = TFIDF.fit_transform([content])
         df = pd.DataFrame(vec.toarray(), columns=TFIDF.get_feature_names())
-        print(df.to_string)
 
         # Write title and df to files
         titles_file.write(title)
@@ -121,9 +134,7 @@ def create_transcript_vectors():
     # flush buffer, actually write to file
     titles_file.close()
 
-    # Process time: 3768.74409s
     # Wall time: 3768.74403s
-    print(f'Process time: {round(time.clock() - cpu_start, 5)}s')
     print(f'Wall time: {round(time.time() - wall_start, 5)}s')
 
 
@@ -137,7 +148,7 @@ def create_keywords_vector(keywords):
     # preprocess tasks
     keywords = keywords.lower()
     keywords = remove_ints(keywords)        # NOTE: remove year numbers in title
-    keywords = remove_one_two_char_words(keywords)
+    keywords = remove_stopwords(keywords)
     # keywords = lemmatize(keywords)        # NOTE: comment out since by far most expensive preprocess task
 
     # barring duplicate words in search query, both methods lead to identical results
