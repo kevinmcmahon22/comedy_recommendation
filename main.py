@@ -9,10 +9,13 @@ def main():
     # create_transcript_files()
 
     # comment when vector files created
-    # create_transcript_vectors()
+    create_transcript_vectors()
 
-    keywords = input()
-    compute_cosine(keywords, num_specials=20)    
+    # keywords = input()
+    # compute_cosine(keywords, num_specials=3)    # num_specials=20
+
+    # SVD - primarilty for collaborative filtering
+
 
 
 if __name__ == "__main__":
