@@ -134,8 +134,7 @@ def create_query_vector(query):
     query = remove_stopwords(query)
     query = lemmatize(query)
 
-    # both methods garner identical results barring duplicate words in search query
-    # VecTrans = TfidfVectorizer()
+    # barring duplicate words in search query, TfidfVectorizer() has exact same result
     VecTrans = CountVectorizer()
     vec = VecTrans.fit_transform([query])
     return pd.DataFrame(vec.toarray(), columns=VecTrans.get_feature_names())
