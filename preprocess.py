@@ -16,21 +16,12 @@ from nltk.corpus import stopwords
 
 
 def remove_ints(text):
-    '''
-    remove any tokens that are numbers/integers
-
-    https://stackoverflow.com/questions/12851791/removing-numbers-from-string
-    '''
-    # This version doesn't work in Python3
-    # return text.translate(None, digits)
+    # https://stackoverflow.com/questions/12851791/removing-numbers-from-string
     remove_digits = str.maketrans('', '', digits)
     return text.translate(remove_digits)
 
 
 def remove_stopwords(text):
-    text = text.lower()
-    # https://stackoverflow.com/questions/12628958/remove-small-words-using-python
-    shortword = re.compile(r'\W*\b\w{1,2}\b')
 
     stopWords = set(stopwords.words('english'))
     content = word_tokenize(text)
@@ -39,19 +30,21 @@ def remove_stopwords(text):
     for word in content:
         if word not in stopWords:
             newText = newText + word + ' '
+
+    # https://stackoverflow.com/questions/12628958/remove-small-words-using-python
+    # shortword = re.compile(r'\W*\b\w{1,2}\b')
+    # newText = shortword.sub('', newText)
     
-    return shortword.sub('', newText)
+    return newText
 
 
 def lemmatize(text):
     '''
+    https://spacy.io/models/en
     Had to run this command in order to use english pipeline for CPU:
-
-    python -m spacy download en_core_web_md
-
-    https://spacy.io/models/en, md stands for medium
+            python -m spacy download en_core_web_sm
     '''
-    nlp = spacy.load('en_core_web_md')
+    nlp = spacy.load('en_core_web_sm') # NOTE using md takes much longer
     doc = nlp(text)
 
     # Lemmatizing each token
@@ -60,14 +53,13 @@ def lemmatize(text):
     return ' '.join(mytokens)
 
 
-def create_transcript_vectors():
+def create_docterm_matrix():
     '''
     Perform text vectorizaion by reading scripts and converting into document-term dataframes
 
     creates:
-    special_titles.txt, containing the name of each special
-    vectors dir, each vec file contains a csv of tf-idf vectors
-    returns: list of 326 pandas df containing vectorized doc terms
+    special_titles.txt, name of each special
+    docterm_matrix.csv, result of TF-IDF vectorization
     '''
 
     # Measure wall time
@@ -97,7 +89,7 @@ def create_transcript_vectors():
         title = ' '.join(title.split('-'))
 
         # skip scripts that contain any of the following keywords in their title
-        skip_tokens = ['snl', 'saturday', 'italiano', 'speech', 'monologue', 'show']
+        skip_tokens = ['snl', 'saturday', 'italiano', 'italiana', 'completa', 'speech', 'monologue', 'show']
         valid_special = True
         for s in skip_tokens:
             if s in title:
@@ -126,25 +118,24 @@ def create_transcript_vectors():
     df.to_csv(f'docterm_matrix.csv')
     titles_file.close()
 
-    # Wall time individually: 3768.74403s
-    print(f'Wall time: {round(time.time() - wall_start, 5)}s')
+    print(f'Wall time: {round(time.time() - wall_start, 2)}s')
 
 
-def create_keywords_vector(keywords):
+def create_query_vector(query):
     '''
     Read text and convert to a vector, just like above function
 
-    returns: a dataframe containing TF-IDF vector for (string) keywords
+    returns: a dataframe containing TF-IDF vector for (string) query
     '''
 
     # preprocess tasks
-    keywords = keywords.lower()
-    keywords = remove_ints(keywords)        # NOTE: remove year numbers in title
-    keywords = remove_stopwords(keywords)
-    # keywords = lemmatize(keywords)        # NOTE: comment out since by far most expensive preprocess task
+    query = query.lower()
+    query = remove_ints(query)
+    query = remove_stopwords(query)
+    query = lemmatize(query)
 
-    # barring duplicate words in search query, both methods lead to identical results
+    # both methods garner identical results barring duplicate words in search query
     # VecTrans = TfidfVectorizer()
     VecTrans = CountVectorizer()
-    vec = VecTrans.fit_transform([keywords])
+    vec = VecTrans.fit_transform([query])
     return pd.DataFrame(vec.toarray(), columns=VecTrans.get_feature_names())

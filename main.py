@@ -1,5 +1,5 @@
 from scrape import create_transcript_files
-from preprocess import create_transcript_vectors
+from preprocess import create_docterm_matrix
 from similarity import compute_cosine
 
 
@@ -9,10 +9,10 @@ def main():
     # create_transcript_files()
 
     # comment when vector files created
-    create_transcript_vectors()
+    # create_docterm_matrix()
 
-    # keywords = input()
-    # compute_cosine(keywords, num_specials=3)    # num_specials=20
+    query = input()
+    compute_cosine(query)
 
     # SVD - primarilty for collaborative filtering
 

@@ -1,40 +1,48 @@
 from sklearn.metrics.pairwise import cosine_similarity
-from preprocess import create_keywords_vector
+from preprocess import create_query_vector
 from tqdm import tqdm
 import pandas as pd
+import numpy as np
+import time
 
 
-def compute_cosine(keywords, n=10, num_specials=326):
+def compute_cosine(query, n=10):
     '''
-    Compute cosine similarity between keywords and each special
+    Compute cosine similarity between search query and each special
     Print top n specials ranked by cosine similarity
-    Use tqdm to print a progress bar in terminal
     
-    NOTE currently takes 2m 15s, only 12% of CPU dedicated for processing
+    title of standup special is kept only for display purposes, not used in computations
+
+    TODO make faster by keeping docterm matrix on a server so it doesn't have to be opened every time
     '''
-    
-    cos_sim = []
 
+    wall_start = time.time()
     f = open('special_titles.txt')
-
     df_docterm = pd.read_csv('docterm_matrix.csv')
     df_docterm = df_docterm.drop(['Unnamed: 0'], axis=1)
+    print(f'Opened files in {round(time.time() - wall_start, 2)}s\n')
 
-    df_query_temp = create_keywords_vector(keywords)
-
-    # Remove words from query if not found in document corpus
-    df_query = pd.DataFrame()
-    for word in df_query_temp.columns:
-        if word in df_docterm.columns:
+    # Create query df of proper size, remove words in query not present in document corpus
+    wall_start = time.time()
+    df_query = pd.DataFrame( np.zeros((1,len(df_docterm.columns)),dtype=int) , columns=df_docterm.columns )
+    df_query_temp = create_query_vector(query)
+    keywords_used = []
+    for word in df_query_temp:
+        if word in df_query.columns:
             df_query[word] = df_query_temp[word]
+            keywords_used.append(word)
+    print(f'Created dataframe for query in {round(time.time() - wall_start, 2)}s\n')
 
-    print(df_query)
+    cos_sim = []
 
+    titles = f.readlines()
+    it = iter(titles)
 
-    for i in tqdm( range(num_specials) , desc="Loading…" , ascii=False , ncols=75 ):
+    # for i in tqdm( range(num_specials) , desc="Loading…" , ascii=False , ncols=75 ): # NOTE runs so fast, no loner needed
+    for i in range(len(titles)):
 
         # get title and df for next special
-        special_name = f.readline()
+        special_name = next(it)
         series_special = df_docterm.loc[i, :]
         df_special = series_special.to_frame().swapaxes("index", "columns")
 
@@ -42,7 +50,12 @@ def compute_cosine(keywords, n=10, num_specials=326):
         sim = cosine_similarity(df_query, df_special)[0][0]
         cos_sim.append( (special_name.strip(), sim) )
     
-    # Show results
+    # Output results
     cos_sim.sort(key = lambda x: x[1], reverse=True)
-    df = pd.DataFrame(cos_sim)
+    df = pd.DataFrame(cos_sim, columns=['Name of special', 'Score'])
+    print(f'TOP {n} SPECIALS BASED ON QUERY "{query}"\n')
+    print(f'\tTokens used: ', end='')
+    for i in keywords_used:
+        print(f'{i} ', end='')
+    print('\n')
     print(df[:n])
