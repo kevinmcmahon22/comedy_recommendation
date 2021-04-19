@@ -6,14 +6,10 @@ import numpy as np
 import time
 
 
-def compute_cosine(query, n=10):
+def compute_similarity(query, n=10, metric='cos'):
     '''
     Compute cosine similarity between search query and each special
     Print top n specials ranked by cosine similarity
-    
-    title of standup special is kept only for display purposes, not used in computations
-
-    TODO make faster by keeping docterm matrix on a server so it doesn't have to be opened every time
     '''
 
     wall_start = time.time()
@@ -46,8 +42,9 @@ def compute_cosine(query, n=10):
         series_special = df_docterm.loc[i, :]
         df_special = series_special.to_frame().swapaxes("index", "columns")
 
-        # calculate cosine similarity, add to list with title
-        sim = cosine_similarity(df_query, df_special)[0][0]
+        # NOTE potential to add more pairwise metrics here
+        if metric == 'cos':
+            sim = cosine_similarity(df_query, df_special)[0][0]
         cos_sim.append( (special_name.strip(), sim) )
     
     # Output results
