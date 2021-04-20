@@ -14,13 +14,13 @@ def getURLs():
     transcript_urls = [t['href'] for t in soup.find_all('a')[67:440]]
     return transcript_urls
 
+
 def getOneTranscipt(url):
     '''
     Scrape url for contents of comedy special
 
     returns: string
     '''
-
     r = requests.get(url)
     soup = BeautifulSoup(r.content, 'html.parser')
     text = soup.find_all('p')
@@ -31,9 +31,8 @@ def getOneTranscipt(url):
     script = ' '.join(script_lines)
 
     # replace non-alphanumeric characters with a space
-    script = re.sub("[^0-9a-zA-Z]+", " ", script)
+    return re.sub("[^0-9a-zA-Z]+", " ", script)
 
-    return script
 
 def create_transcript_files():
     '''

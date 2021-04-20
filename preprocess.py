@@ -1,10 +1,10 @@
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
-import re
-from string import digits
-import spacy
-import pandas as pd
-import time
 from tqdm import tqdm
+from string import digits
+import pandas as pd
+import spacyl
+import time
+import re
 
 import nltk
 from nltk.tokenize import word_tokenize
