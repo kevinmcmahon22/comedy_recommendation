@@ -11,17 +11,14 @@ def main():
     # comment when vector files created
     # create_docterm_matrix()
 
-    query = input()
-    compute_similarity(query)
+    queryType = input("Enter Recommendation Type (1 for content based or 2 for title based): ")
+    query = input("Enter Search Query: ")
+    compute_similarity(query, queryType)
 
     '''
     TODO
     make faster by keeping docterm matrix on a server so it doesn't have to be opened every time
 
-    cosine similarity for comedian name/title
-
-    maybe compute cosine similarity across specials
-        if user likes one special suggest others they may like based on cosine similarity
         
     SVD - primarilty for collaborative filtering
     '''

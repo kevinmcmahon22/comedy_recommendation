@@ -2,7 +2,7 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 from tqdm import tqdm
 from string import digits
 import pandas as pd
-import spacyl
+import spacy
 import time
 import re
 
