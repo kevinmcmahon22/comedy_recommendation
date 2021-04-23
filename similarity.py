@@ -22,7 +22,7 @@ def compute_cross_special_similarity(df_docterm, titles):
                 cosines[row, rows] = cosine_similarity(data[row, :].reshape(1, -1), data[rows, :].reshape(1, -1))[0][0]
             else:
                 cosines[row, rows] = 1
-        
+    
     # Save pre-computed cosine similarities to cosines.csv 
     cos_df = pd.DataFrame(data=cosines, columns=titles)
     # cos_df.to_csv (r'/content/drive/My Drive/CSE881 Group Project/cosines.csv', index = False, header=True)
@@ -34,7 +34,7 @@ def compute_similarity(query, queryType, n=10, metric='cos'):
     Compute cosine similarity between search query and each special
     Print top n specials ranked by cosine similarity
 
-    queryType int 1 for most relevant by title, int 2 for relevant by keywords/tokens
+    queryType int 1 for most relevant by keywords/tokens, int 2 for relevant by title
     '''
 
     f = open('special_titles.txt')
