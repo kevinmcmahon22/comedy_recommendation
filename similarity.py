@@ -29,19 +29,19 @@ def compute_cross_special_similarity(df_docterm, titles):
     cos_df.to_csv('cosines.csv', index = False, header=True)
 
 
-def compute_similarity(query, queryType, n=10, metric='cos'):
+def compute_similarity(query, byTitle, n=10, metric='cos'):
     '''
     Compute cosine similarity between search query and each special
     Print top n specials ranked by cosine similarity
 
-    queryType int 1 for most relevant by keywords/tokens, int 2 for relevant by title
+    byTitle - bool, True if query is a title, false if it is a set of keywords to search for
     '''
-
+    wall_start = time.time()
     f = open('special_titles.txt')
     titles = [x.strip() for x in f.readlines()]
     # Exit program if an invalid title is entered
-    if query not in titles and queryType == str(2):
-        print('Please entery a valid special name\n')
+    if query not in titles and byTitle:
+        print('\n\tError: Please entery a valid special name\n')
         return 1
 
     df_docterm = pd.read_csv('docterm_matrix.csv')
@@ -49,8 +49,7 @@ def compute_similarity(query, queryType, n=10, metric='cos'):
     print(f'\nOpened files in {round(time.time() - wall_start, 2)}s\n')
     
 
-    if queryType == str(1):
-
+    if not byTitle:
         # Create query df of proper size, remove words in query not present in document corpus
         wall_start = time.time()
         df_query = pd.DataFrame( np.zeros((1,len(df_docterm.columns)),dtype=int) , columns=df_docterm.columns )
@@ -90,8 +89,8 @@ def compute_similarity(query, queryType, n=10, metric='cos'):
         print(df[:n])
 
 
-    elif queryType == str(2):
-
+    else:
+        # Only need to run next line once, comment out
         # compute_cross_special_similarity(df_docterm, titles)
 
         # cosines = pd.read_csv('/content/drive/My Drive/CSE881 Group Project/cosines.csv')
